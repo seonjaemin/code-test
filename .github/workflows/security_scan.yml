@@ -9,6 +9,9 @@ on:
 jobs:
   semgrep:
     runs-on: ubuntu-latest
+    permissions: # 권한 설정 추가 또는 수정
+      security-events: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
         name: Checkout code
