@@ -1,0 +1,40 @@
+name: Security Scan
+
+on: [push]
+
+jobs:
+  security_check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Build Docker Image
+        run: docker build -t my-web-app .
+
+      - name: Run Trivy Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'my-web-app:latest'
+          exit-code: 1
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+
+      - name: Run Semgrep Scan (Python)
+        run: semgrep --config p/python --timeout 60 ./
+
+      - name: Create dummy Python file for Semgrep test
+        run: |
+          mkdir -p test_python
+          echo "import os\nprint(os.system('ls -l'))" > test_python/unsafe.py
+
+      - name: Run Semgrep Scan (Dummy Python)
+        run: semgrep --config p/security --timeout 60 ./test_python
