@@ -1,4 +1,4 @@
-name: Security Scan
+name: Security Scan with SARIF
 
 on: [push]
 
@@ -26,5 +26,10 @@ jobs:
           python-version: '3.x'
       - run: pip install semgrep
 
-      - name: Run Semgrep Scan (Python)
-        run: semgrep --config p/python --timeout 60 ./
+      - name: Run Semgrep Scan (HTML) and Generate SARIF
+        run: semgrep --sarif --output semgrep.sarif --config p/html ./index.html
+
+      - name: Upload Semgrep SARIF results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: semgrep.sarif
